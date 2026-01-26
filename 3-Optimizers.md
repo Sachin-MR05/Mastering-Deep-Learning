@@ -30,13 +30,14 @@ These optimizers use first derivatives (gradients) of the loss function. Common 
 - Adaptive learning-rate optimizers (Adagrad, RMSProp, Adam).
 
 ## Batch Gradient Descent
+![Batch GD](./asserts/batch_gd.png)
 Gradient Descent updates parameters in the direction of the negative gradient of the loss to minimize it.
 
 ### Example: Mean Squared Error (MSE)
 For regression, a common loss is the MSE:
 
 $$
-	ext{Loss} = \frac{1}{n}\sum_{i=1}^n (y_i - \hat y_i)^2
+\\text{Loss} = \frac{1}{n}\sum_{i=1}^n (y_i - \hat y_i)^2
 $$
 
 Gradient descent asks: "If I slightly change my parameters, will the loss go up or down?" The derivative answers this.
@@ -103,3 +104,51 @@ The update continues until the derivative (gradient) approaches zero.
 3. Evaluate the gradient at those parameter values.
 4. Compute step sizes: step = learning rate × gradient.
 5. Update parameters: new = old - step.
+
+## Stochastic Gradient Descent (SGD)
+
+In Gradient Descent (GD) we compute the loss (and gradient) over the full dataset. In Stochastic Gradient Descent (SGD) we use one example (or a small mini-batch) to compute an update. SGD's gradient is an unbiased estimator of the true gradient:
+
+$$
+\mathbb{E}[\nabla L_j(w)] = \nabla L(w)
+$$
+
+So individual updates can be noisy (one sample may give a small or even opposite-signed gradient), but on average SGD moves in the correct direction.
+
+![SGD](./asserts/sgd.png)
+
+### One-epoch view (concise)
+Let the dataset have $N$ examples. Starting from weights $w_0$, one epoch of (pure) SGD looks like:
+
+1. Pick example $x_1$, compute $g_1 = \nabla L(x_1, w_0)$ and update
+
+$$
+w_1 = w_0 - \alpha g_1
+$$
+
+2. Pick example $x_2$, compute $g_2 = \nabla L(x_2, w_1)$ and update
+
+$$
+w_2 = w_1 - \alpha g_2
+$$
+
+... repeat until example $x_N$ gives $w_N$, which completes one epoch. Then shuffle and repeat for the next epoch.
+
+### Why noise appears in SGD
+- Batch GD uses the full dataset to compute the exact gradient.
+- SGD uses a random subset (often a single example), producing an estimate; the estimation error appears as noise.
+### SGD procedure (summary)
+1. Take one (or a mini-) batch.
+2. Compute the gradient using current weights.
+3. Update weights immediately: $w\leftarrow w - \alpha \nabla L_{\text{batch}}(w)$.
+4. Repeat until all data are processed (one epoch), then shuffle for the next epoch.
+
+### Clean comparison: GD vs SGD
+
+| Aspect              | GD   | SGD |
+| ------------------- | ---- | --- |
+| Gradients per epoch | N    | N   |
+| Updates per epoch   | 1    | N   |
+| Memory              | High | Low |
+| Early learning      | No   | Yes |
+| Scales to big data  | No   | Yes |
